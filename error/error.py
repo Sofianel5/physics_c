@@ -36,6 +36,9 @@ class MeasuredValue:
             print(r"""y_{min}=value""".replace("value", str(self.value-self.accuracy)))
         return self.value-self.accuracy
     
+    def to_latex(self):
+        return r"(self.value \text{self.unit} \pm self.accuracy \text{self.unit})".replace("self.value", str(self.value)).replace("self.unit", self.unit).replace("self.accuracy", str(self.accuracy))
+
     def negate(self, should_print=False):
         if should_print:
             print(r"""y*-1""")
@@ -66,12 +69,14 @@ class MeasuredValue:
                 )
         else:
             if should_print:
-                    print(r"(self.value \text{self.unit} \pm self.accuracy \text{self.unit}) + other \text{self.unit} \text{self.unit}=result.value \text{self.unit} \pm result.accuracy \text{self.unit}\\".replace("self.accuracy", str(self.accuracy)).replace("self.value", str(self.value)).replace("self.unit", self.unit).replace("other", str(other)).replace("result.accuracy", str(self.accuracy+other.accuracy)).replace("result.value", str(self.value+other.value)))
+                    print(r"(self.value \text{self.unit} \pm self.accuracy \text{self.unit}) + other \text{self.unit}=result.value \text{self.unit} \pm result.accuracy \text{self.unit}\\".replace("self.accuracy", str(self.accuracy)).replace("self.value", str(self.value)).replace("self.unit", self.unit).replace("other", str(other)).replace("result.accuracy", str(self.accuracy+other.accuracy)).replace("result.value", str(self.value+other.value)))
             return MeasuredValue(self.value+other, self.unit, self.accuracy)
 
-    def multiply(self, other, dependent):
+    def multiply(self, other, dependent, should_print=False):
         if isinstance(other, MeasuredValue):
             if dependent:
+                if should_print:
+                    print(r"(self.value \text{self.unit} \pm self.accuracy \text{self.unit}) * (other \text{self.unit} \pm other.accuracy \text{self.unit})=self.value*other.value \text{self.unit*other.unit} \pm self.value*other.value*(\frac{self.accuracy}{self.value}^2+\frac{other.accuracy}{other.value}^2) \text{self.unit*other.unit}=ans".replace("self.value", str(self.value)).replace("self.unit", self.unit).replace("self.accuracy", str(self.accuracy)).replace("other.accuracy", str(other.accuracy)).replace("other.value", str(other.value)).replace("other.unit", str(other.unit)).replace("ans", MeasuredValue(self.value*other.value,f"{self.unit}*{other.unit}", (self.value*other.value)*math.sqrt(self.relative_error**2+other.relative_error**2)).to_latex()))
                 return MeasuredValue(
                     self.value*other.value, 
                     f"{self.unit}*{other.unit}", 
